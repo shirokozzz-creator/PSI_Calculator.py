@@ -85,25 +85,45 @@ if submitted:
     total_score = sum(st.session_state.weights[i][user_responses[i]] for i in range(10))
     
     st.divider()
-    st.subheader(f"📊 診斷結果：PSI 指數 {total_score}%")
     
-    diagnosis = ""
+    # 根據分數決定顏色
     if total_score <= 25:
-        diagnosis = "【航太級靈魂】你具備強大的自我驅動力，完全在對抗熵增。"
-        st.success(diagnosis)
+        score_color = "#28a745"  # 綠色
+        status_title = "【 航太級靈魂 】"
+        shock_msg = "維持得很好，你目前依然掌控著自己的航太引擎。"
     elif total_score <= 50:
-        diagnosis = "【認知生鏽預警】環境已開始侵蝕你的意志，建議啟動神經重塑。"
-        st.warning(diagnosis)
+        score_color = "#ffc107"  # 黃色
+        status_title = "【 認知生鏽預警 】"
+        shock_msg = "警報：平庸感正在侵蝕你的神經，你快要變成派大星了！"
     else:
-        diagnosis = "【深度海星狀態】警報！你已陷入習得性平庸，急需強烈外力干預。"
-        st.error(diagnosis)
+        score_color = "#dc3545"  # 紅色
+        status_title = "【 深度海星狀態 】"
+        shock_msg = "危險！你的大腦已進入靜態損壞，再不行動就真的變成了廢柴大叔！"
+
+    # --- 醒目的巨大數字與標題 ---
+    st.markdown(f"""
+        <div style="text-align: center; padding: 20px; border: 5px solid {score_color}; border-radius: 15px;">
+            <h2 style="color: {score_color}; margin-bottom: 0;">{status_title}</h2>
+            <p style="font-size: 80px; font-weight: 800; color: {score_color}; margin: 0;">{total_score}%</p>
+            <h3 style="color: #555;">派大星指數 (PSI)</h3>
+            <hr style="border: 1px solid #ddd;">
+            <p style="font-size: 24px; font-weight: bold; color: #333;">{shock_msg}</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+
+    # 診斷語句 (用於 PDF)
+    diagnosis = f"{status_title} {shock_msg}"
 
     # 產出 PDF 內容
     pdf_bytes = generate_psi_pdf(age, height, weight, body_fat, total_score, diagnosis)
     
+    # 下載按鈕也做醒目一點
     st.download_button(
-        label="📥 下載 PDF 診斷報告",
+        label="📥 點此領取你的『航太級診斷報告書』",
         data=bytes(pdf_bytes),
         file_name=f"PSI_Report_{age}.pdf",
-        mime="application/pdf"
+        mime="application/pdf",
+        use_container_width=True
     )
